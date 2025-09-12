@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -19,9 +20,16 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
+
+        $userExists = User::where('email', $validated['email'])->first();
+        if ($userExists) {
+            return response()->json([
+                'message' => 'User already exists',
+            ], 422);
+        }
 
         $user = User::create([
             'name' => $validated['name'],
@@ -50,11 +58,13 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($validated)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            // throw ValidationException::withMessages([
+            //     'email' => ['The provided credentials are incorrect.'],
+            // ]);
+            return response()->json([
+                'message' => 'The provided credentials are incorrect.',
+            ], 422);
         }
-
         $user = Auth::user();
         $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -70,7 +80,11 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->currentAccessToken();
+        if ($token && $token instanceof PersonalAccessToken) {
+            $token->delete();
+        }
+
 
         return response()->json([
             'message' => 'Logout successful',

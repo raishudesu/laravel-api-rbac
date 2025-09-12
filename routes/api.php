@@ -15,7 +15,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
-    // Posts with permission-based access
+
+    // Posts with permission-based access configured in PostController
     Route::apiResource('posts', PostController::class);
 
     // Role management (admin only)
