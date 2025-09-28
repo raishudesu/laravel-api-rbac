@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Permission;
 use App\Models\Role;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class RolePermissionSeeder extends Seeder
@@ -38,7 +37,7 @@ class RolePermissionSeeder extends Seeder
                 'name' => 'Super Admin',
                 'slug' => 'super-admin',
                 'description' => 'Full system access',
-                'permissions' => Permission::all()->pluck('id')->toArray()
+                'permissions' => Permission::all()->pluck('id')->toArray(),
             ],
             [
                 'name' => 'Admin',
@@ -50,8 +49,8 @@ class RolePermissionSeeder extends Seeder
                     'update-posts',
                     'delete-posts',
                     'manage-users',
-                    'view-analytics'
-                ])->pluck('id')->toArray()
+                    'view-analytics',
+                ])->pluck('id')->toArray(),
             ],
             [
                 'name' => 'Editor',
@@ -61,16 +60,16 @@ class RolePermissionSeeder extends Seeder
                     'create-posts',
                     'read-posts',
                     'update-posts',
-                    'delete-posts'
-                ])->pluck('id')->toArray()
+                    'delete-posts',
+                ])->pluck('id')->toArray(),
             ],
             [
                 'name' => 'User',
                 'slug' => 'user',
                 'description' => 'Basic user access',
                 'permissions' => Permission::whereIn('slug', [
-                    'read-posts'
-                ])->pluck('id')->toArray()
+                    'read-posts',
+                ])->pluck('id')->toArray(),
             ],
         ];
 

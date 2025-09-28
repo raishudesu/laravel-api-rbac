@@ -2,77 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
-use App\Models\User;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Services\LoginService;
+use App\Services\RegistrationService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
+    protected RegistrationService $registrationService;
+
+    protected LoginService $loginService;
+
+    public function __construct(RegistrationService $registrationService, LoginService $loginService)
+    {
+        $this->registrationService = $registrationService;
+        $this->loginService = $loginService;
+    }
+
     /**
      * Register a new user.
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
+        $validated = $request->validated();
 
-        $userExists = User::where('email', $validated['email'])->first();
-        if ($userExists) {
-            return response()->json([
-                'message' => 'User already exists',
-            ], 422);
-        }
+        $result = $this->registrationService->register($validated);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role_id' => Role::where('slug', 'user')->first()?->id, // Default role
-        ]);
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        return response()->json([
-            'user' => $user->load('role'),
-            'token' => $token,
-            'message' => 'User registered successfully',
-        ], 201);
+        return response()->json($result, 201);
     }
 
     /**
      * Login user.
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $validated = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
 
-        if (!Auth::attempt($validated)) {
-            // throw ValidationException::withMessages([
-            //     'email' => ['The provided credentials are incorrect.'],
-            // ]);
-            return response()->json([
-                'message' => 'The provided credentials are incorrect.',
-            ], 422);
-        }
-        $user = Auth::user();
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $validated = $request->validated();
 
-        return response()->json([
-            'user' => $user->load('role'),
-            'token' => $token,
-            'message' => 'Login successful',
-        ]);
+        $result = $this->loginService->login($validated);
+
+        return response()->json($result);
+
     }
 
     /**
@@ -84,7 +56,6 @@ class AuthController extends Controller
         if ($token && $token instanceof PersonalAccessToken) {
             $token->delete();
         }
-
 
         return response()->json([
             'message' => 'Logout successful',

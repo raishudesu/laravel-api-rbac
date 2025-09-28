@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -51,6 +50,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
     /**
      * Boot the model.
      */
@@ -110,7 +110,7 @@ class User extends Authenticatable
      */
     public function hasAnyPermission(array $permissions): bool
     {
-        if (!$this->role) {
+        if (! $this->role) {
             return false;
         }
 

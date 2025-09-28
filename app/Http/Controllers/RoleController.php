@@ -52,7 +52,7 @@ class RoleController extends Controller
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'slug' => ['sometimes', 'required', 'string', 'max:255', 'unique:roles,slug,' . $role->id],
+            'slug' => ['sometimes', 'required', 'string', 'max:255', 'unique:roles,slug,'.$role->id],
             'description' => ['nullable', 'string'],
             'permissions' => ['array'],
             'permissions.*' => ['exists:permissions,id'],
