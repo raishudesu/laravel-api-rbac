@@ -21,7 +21,7 @@ class RegistrationService
             Log::info('Registration attempt started', ['email' => $validatedData['email']]);
 
             // Check if user already exists
-            $userExists = User::where('email', $validatedData['email'])->first();
+            $userExists = $this->emailExists($validatedData['email']);
 
             if ($userExists) {
                 Log::warning('Registration failed: User already exists', ['email' => $validatedData['email']]);
@@ -99,7 +99,7 @@ class RegistrationService
     /**
      * Check if email is already registered.
      */
-    public function emailExists(string $email): bool
+    private function emailExists(string $email): bool
     {
         return User::where('email', $email)->exists();
     }
